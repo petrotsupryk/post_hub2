@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Posts implements Serializable {
+public class Post implements Serializable {
     private static final String ID_FIELD_NAME = "id";
     private static final String USER_ID_FIELD_NAME = "userId";
     private static final String TITLE_FIELD_NAME = "title";
@@ -33,7 +33,7 @@ public class Posts implements Serializable {
     private String title;
 
     @Column(name = "context")
-    private String context;
+    private String content;
 
     @Column(name = "created")
     private LocalDateTime created = LocalDateTime.now();
