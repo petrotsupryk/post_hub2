@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class PostDto implements Serializable {
     private int id;
     private String title;
-    private String context;
+    private String content;
     private LocalDateTime created;
     private LocalDateTime updated;
 }

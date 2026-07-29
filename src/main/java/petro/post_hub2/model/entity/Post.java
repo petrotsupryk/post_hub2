@@ -32,7 +32,7 @@ public class Post implements Serializable {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "context")
+    @Column(name = "content")
     private String content;
 
     @Column(name = "created")

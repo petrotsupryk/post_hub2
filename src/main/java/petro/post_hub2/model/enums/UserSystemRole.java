@@ -10,4 +10,8 @@ public enum UserSystemRole {
     ADMIN("ADMIN"),
     SUPER_ADMIN("SUPER_ADMIN");
     private final String role;
+
+    public static UserSystemRole fromName(String name) {
+        return UserSystemRole.valueOf(name.toUpperCase());
+    }
 }

@@ -17,4 +17,8 @@ public class CustomResponse<T> implements Serializable {
     public static <T extends Serializable> CustomResponse<T> successWithToken(T body) {
         return new CustomResponse<>("token created successfully", body, true);
     }
+
+    public static <T extends Serializable> CustomResponse<T> success(T body) {
+        return new CustomResponse<>("success", body, true);
+    }
 }

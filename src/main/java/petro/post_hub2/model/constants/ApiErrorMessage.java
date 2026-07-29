@@ -16,7 +16,9 @@ public enum ApiErrorMessage {
     INVALID_PASSWORD("invalid password"),
     ROLE_NOT_FOUND_BY_NAME("role not found by name %s"),
     TOKEN_EXPIRED("token expired"),
-    INVALID_TOKEN_SIGNATURE("invalid token signature");
+    INVALID_TOKEN_SIGNATURE("invalid token signature"),
+    DONT_HAVE_ACCESS("this user don't have access to do this action"),
+    POST_NOT_FOUND_BY_ID("not found post by id: %s");
     private final String message;
 
     public String getMessage(Object... args) {
