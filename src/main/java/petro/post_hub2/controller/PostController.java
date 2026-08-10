@@ -91,7 +91,7 @@ public class PostController {
     @ApiResponses(value =
     @ApiResponse(
             responseCode = "200",
-            description = "successful updated",
+            description = "successful updated post",
             content = @Content(mediaType = "application/json",
                     examples = @ExampleObject(value = """
                             {
