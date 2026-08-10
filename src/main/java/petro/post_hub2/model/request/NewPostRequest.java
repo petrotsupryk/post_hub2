@@ -17,6 +17,6 @@ public class NewPostRequest implements Serializable {
     private String title;
 
     @NotBlank(message = "context must be present")
-    @Size(min = 5, max = 10, message = "context must be from 5 to 100")
+    @Size(min = 5, max = 50, message = "context must be from 5 to 100")
     private String content;
 }
