@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "posts")
 public class Post implements Serializable {
-    private static final String ID_FIELD_NAME = "id";
-    private static final String USER_ID_FIELD_NAME = "userId";
-    private static final String TITLE_FIELD_NAME = "title";
-    private static final String CONTEXT_FIELD_NAME = "context";
-    private static final String UPDATED_FIELD_NAME = "updated";
-    private static final String DELETED_FIELD_NAME = "deleted";
+    public static final String ID_FIELD_NAME = "id";
+    public static final String USER_ID_FIELD_NAME = "userId";
+    public static final String TITLE_FIELD_NAME = "title";
+    public static final String CONTENT_FIELD_NAME = "content";
+    public static final String UPDATED_FIELD_NAME = "updated";
+    public static final String DELETED_FIELD_NAME = "deleted";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

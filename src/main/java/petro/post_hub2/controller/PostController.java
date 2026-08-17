@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import petro.post_hub2.model.dto.PostDto;
 import petro.post_hub2.model.dto.PostSearchDto;
 import petro.post_hub2.model.request.NewPostRequest;
+import petro.post_hub2.model.request.PostSearchRequest;
 import petro.post_hub2.model.request.UpdatePostRequest;
 import petro.post_hub2.model.response.CustomResponse;
 import petro.post_hub2.model.response.PaginationResponse;
@@ -169,6 +171,28 @@ public class PostController {
     ) {
         Pageable pageable = PageRequest.of(page, limit);
         CustomResponse<PaginationResponse<PostSearchDto>> response = postService.findAllPostsByPagination(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/search")
+    @Operation(summary = "get search",
+            description = "get all with pagination and param")
+    @ApiResponses(value =
+    @ApiResponse(
+            responseCode = "200",
+            description = "get all post with pagination and param",
+            content = @Content(mediaType = "application/json",
+                    examples = @ExampleObject(value = """
+                            
+                            """))
+    ))
+    public ResponseEntity<CustomResponse<PaginationResponse<PostSearchDto>>> findPostAllByPaginationWithParam(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit,
+            @RequestBody @Valid PostSearchRequest postSearchRequest
+    ) {
+        Pageable pageable = PageRequest.of(page, limit);
+        CustomResponse<PaginationResponse<PostSearchDto>> response = postService.findAllPostsByPaginationAndParams(pageable, postSearchRequest);
         return ResponseEntity.ok(response);
     }
 
