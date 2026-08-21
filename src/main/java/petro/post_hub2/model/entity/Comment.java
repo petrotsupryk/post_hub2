@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Email
+@Entity
 @Table(name = "comments")
 public class Comment {
     public final static String ID_FIELD_NAME = "id";
