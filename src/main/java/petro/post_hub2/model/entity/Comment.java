@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Email
 @Table(name = "comments")
-public class Comments {
-    private final static String ID_FIELD_NAME = "id";
-    private final static String MESSAGE_FIELD_NAME = "message";
-    private final static String CREATED_FIELD_NAME = "created";
-    private final static String UPDATED_FIELD_NAME = "updated";
-    private final static String DELETED_FIELD_NAME = "deleted";
+public class Comment {
+    public final static String ID_FIELD_NAME = "id";
+    public final static String MESSAGE_FIELD_NAME = "message";
+    public final static String CREATED_FIELD_NAME = "created";
+    public final static String UPDATED_FIELD_NAME = "updated";
+    public final static String DELETED_FIELD_NAME = "deleted";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
