@@ -20,7 +20,8 @@ public enum ApiErrorMessage {
     DONT_HAVE_ACCESS("this user don't have access to do this action"),
     POST_NOT_FOUND_BY_ID("not found post by id: %s"),
     POST_WITH_THIS_TITLE_ALREADY_EXISTS("post with title %s already exists"),
-    USER_NOT_FOUND_BY_ID("not found user by id %s");
+    USER_NOT_FOUND_BY_ID("not found user by id %s"),
+    COOMENT_NOT_FOUND_BY_ID("comment not found by id %s");
     private final String message;
 
     public String getMessage(Object... args) {
