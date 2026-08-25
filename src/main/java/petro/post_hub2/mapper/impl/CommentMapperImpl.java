@@ -1,5 +1,6 @@
 package petro.post_hub2.mapper.impl;
 
+import org.springframework.stereotype.Component;
 import petro.post_hub2.mapper.CommentMapper;
 import petro.post_hub2.model.dto.CommentDto;
 import petro.post_hub2.model.dto.CommentSearchDto;
@@ -7,7 +8,7 @@ import petro.post_hub2.model.entity.Comment;
 import petro.post_hub2.model.entity.Post;
 import petro.post_hub2.model.entity.User;
 import petro.post_hub2.model.request.NewCommentRequest;
-
+@Component
 public class CommentMapperImpl implements CommentMapper {
     @Override
     public CommentDto convertCommentToCommentDto(Comment comment) {
