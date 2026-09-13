@@ -49,7 +49,7 @@ public class PostServiceImpl implements PostService {
         }
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_EMAIL.getMessage(userId)));
-        Post post = postMapper.convertPostToPostDto(newPostRequest);
+        Post post = postMapper.convertNewPostDtoToPost(newPostRequest);
         post.setUser(user);
         post = postRepository.save(post);
         PostDto postDto = postMapper.convertPostToPostDto(post);

@@ -11,7 +11,9 @@ import petro.post_hub2.model.constants.ApiErrorMessage;
 import petro.post_hub2.model.dto.PostDto;
 import petro.post_hub2.model.entity.Post;
 import petro.post_hub2.model.entity.User;
+import petro.post_hub2.model.exceptions.DataExistsException;
 import petro.post_hub2.model.exceptions.NotFoundException;
+import petro.post_hub2.model.request.NewPostRequest;
 import petro.post_hub2.repository.PostRepository;
 import petro.post_hub2.repository.UserRepository;
 import petro.post_hub2.security.validation.AccessValidator;
@@ -83,4 +85,57 @@ public class PostServiceTest {
         verify(postRepository, times(1)).findByIdAndDeletedFalse(123456);
         verify(postMapper, never()).convertPostToPostDto(any(Post.class));
     }
+
+    @Test
+    void createPost_Ok() {
+        NewPostRequest request = new NewPostRequest("new title", "new content");
+        when(postRepository.existsByTitle(request.getTitle())).thenReturn(false);
+        when((userRepository.findByIdAndDeletedFalse(1))).thenReturn(Optional.of(testUser));
+        when(postMapper.convertNewPostDtoToPost(request)).thenReturn(testPost);
+        when(postRepository.save(any())).thenReturn(testPost);
+        when(postMapper.convertPostToPostDto(testPost)).thenReturn(testPostDto);
+
+        PostDto result = postServiceImpl.save(request, 1).getBody();
+
+        assertNotNull(result);
+        assertEquals(testPostDto.getId(), result.getId());
+        assertEquals(testPostDto.getTitle(), result.getTitle());
+        assertEquals(testPostDto.getContent(), result.getContent());
+
+        verify(postRepository, times(1)).existsByTitle(request.getTitle());
+        verify(userRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(postMapper, times(1)).convertNewPostDtoToPost(request);
+        verify(postRepository, times(1)).save(any());
+        verify(postMapper, times(1)).convertPostToPostDto(testPost);
+    }
+
+    @Test
+    void createPost_TitleAlreadyExists_DataExistsException() {
+        NewPostRequest request = new NewPostRequest("new title", "new content");
+        when(postRepository.existsByTitle(request.getTitle())).thenReturn(true);
+        DataExistsException exception = assertThrows(DataExistsException.class, () -> postServiceImpl.save(request, 1));
+        assertEquals(ApiErrorMessage.POST_WITH_THIS_TITLE_ALREADY_EXISTS.getMessage(request), exception.getMessage());
+
+        verify(postRepository, times(1)).existsByTitle(request.getTitle());
+        verify(userRepository, never()).findByIdAndDeletedFalse(1);
+        verify(postMapper, never()).convertNewPostDtoToPost(request);
+        verify(postRepository, never()).save(any());
+        verify(postMapper, never()).convertPostToPostDto(testPost);
+    }
+
+    @Test
+    void createPost_UserNotFound_NotFoundException() {
+        NewPostRequest request = new NewPostRequest("new title", "new content");
+        when(postRepository.existsByTitle(request.getTitle())).thenReturn(false);
+        when(userRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> postServiceImpl.save(request, 1));
+        assertEquals(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(1), exception.getMessage());
+
+        verify(postRepository, times(1)).existsByTitle(request.getTitle());
+        verify(userRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(postMapper, never()).convertNewPostDtoToPost(request);
+        verify(postRepository, never()).save(any());
+        verify(postMapper, never()).convertPostToPostDto(testPost);
+    }
 }
+

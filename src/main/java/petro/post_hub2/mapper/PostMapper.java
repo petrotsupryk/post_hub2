@@ -9,7 +9,7 @@ import petro.post_hub2.model.request.NewPostRequest;
 public interface PostMapper {
     PostDto convertPostToPostDto(Post post);
 
-    Post convertPostToPostDto(NewPostRequest newPostRequest);
+    Post convertNewPostDtoToPost(NewPostRequest newPostRequest);
 
     PostSearchDto convertPostToPostSearchDto(Post post);
 

@@ -15,7 +15,7 @@ public class PostMapperImpl implements PostMapper {
     }
 
     @Override
-    public Post convertPostToPostDto(NewPostRequest newPostRequest) {
+    public Post convertNewPostDtoToPost(NewPostRequest newPostRequest) {
         Post post = new Post();
         post.setTitle(newPostRequest.getTitle());
         post.setContent(newPostRequest.getContent());
