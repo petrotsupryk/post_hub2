@@ -68,8 +68,11 @@ public class PostServiceTest {
     void getById_PostExists_ReturnsPostDto() {
         when(postRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(testPost));
         when(postMapper.convertPostToPostDto(testPost)).thenReturn(testPostDto);
+
         PostDto result = postServiceImpl.getById(1).getBody();
+
         assertNotNull(result);
+
         assertEquals(testPostDto.getId(), result.getId());
         assertEquals(testPostDto.getTitle(), result.getTitle());
         assertEquals(testPostDto.getContent(), result.getContent());
@@ -192,8 +195,49 @@ public class PostServiceTest {
         verify(accessValidator, times(1)).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
         verify(postRepository, never()).save(testPost);
         verify(postMapper, never()).convertPostToPostDto(testPost);
-
     }
 
+    @Test
+    void deletedPost_Ok() {
+        when(postRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(testPost));
+        doNothing().when(accessValidator).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
+        when(postRepository.save(testPost)).thenReturn(testPost);
+
+        postServiceImpl.deleted(1, testUser.getId());
+
+        verify(postRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(accessValidator, times(1)).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
+        verify(postRepository, times(1)).save(testPost);
+    }
+
+    @Test
+    void deleted_NotFound_NotFoundException() {
+        when(postRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () ->
+                postServiceImpl.deleted(1, testUser.getId()));
+
+        assertEquals(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(1), exception.getMessage());
+
+        verify(postRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(accessValidator, never()).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
+        verify(postRepository, never()).save(testPost);
+    }
+
+    @Test
+    void deleted_ValidateAdminOrOwnerAccess_AccessDeniedException() {
+        when(postRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(testPost));
+        doThrow(new AccessDeniedException(ApiErrorMessage.DONT_HAVE_ACCESS.getMessage()))
+                .when(accessValidator).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
+
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () ->
+                postServiceImpl.deleted(1, testUser.getId()));
+
+        assertEquals(ApiErrorMessage.DONT_HAVE_ACCESS.getMessage(1), exception.getMessage());
+
+        verify(postRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(accessValidator, times(1)).validateAdminOrOwnerAccess(testPost.getUser().getId(), testUser.getId());
+        verify(postRepository, never()).save(testPost);
+    }
 }
 
