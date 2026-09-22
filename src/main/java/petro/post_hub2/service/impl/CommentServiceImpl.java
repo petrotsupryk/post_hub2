@@ -45,7 +45,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CustomResponse<CommentDto> createComment(NewCommentRequest newCommentRequest, int userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(() ->
-                new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_EMAIL.getMessage(userId)));
+                new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
         Post post = postRepository.findByIdAndDeletedFalse(newCommentRequest.getPostId()).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(newCommentRequest.getPostId())));
         Comment comment = commentMapper.convertNewCommentRequestToComment(newCommentRequest, user, post);
