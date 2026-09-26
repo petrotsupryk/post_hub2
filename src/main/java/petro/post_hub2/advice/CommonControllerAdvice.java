@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import petro.post_hub2.model.exceptions.DataExistsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,14 @@ public class CommonControllerAdvice {
     protected ResponseEntity<String> handleException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(DataExistsException.class)
+    @ResponseBody
+    protected ResponseEntity<String> handleDataExistsException(DataExistsException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(e.getMessage());
     }
 

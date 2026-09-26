@@ -1,5 +1,6 @@
 package petro.post_hub2.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -20,10 +21,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import petro.post_hub2.SecurityApplication;
 import petro.post_hub2.model.dto.PostDto;
 import petro.post_hub2.model.entity.User;
 import petro.post_hub2.model.exceptions.InvalidDataException;
+import petro.post_hub2.model.request.NewPostRequest;
+import petro.post_hub2.model.request.UpdatePostRequest;
 import petro.post_hub2.model.response.CustomResponse;
 import petro.post_hub2.repository.UserRepository;
 import petro.post_hub2.security.JwtTokenProvider;
@@ -87,6 +91,79 @@ public class PostControllerTest {
         assertNotNull(postDto);
         assertEquals("roman_mentor", postDto.getTitle());
         assertEquals("success", postDto.getContent());
+    }
+
+    @Test
+    void getById_NotFound_404() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .get("/post/-1")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    void savePost_Ok() throws Exception {
+        NewPostRequest request = new NewPostRequest("new day", "new comment day");
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .post("/post/save")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+        CustomResponse<PostDto> response = convertResponseToPostDto(result.getResponse().getContentAsByteArray());
+        assertTrue(response.isSuccess());
+
+        PostDto postDto = Objects.nonNull(response.getBody()) ? response.getBody() : null;
+        assertNotNull(postDto);
+        assertEquals(request.getTitle(), postDto.getTitle());
+        assertEquals(request.getContent(), postDto.getContent());
+    }
+
+    @Test
+    @Transactional
+    void savePost_TitleExists_400() throws Exception {
+        NewPostRequest request = new NewPostRequest("new day", "new comment day");
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .post("/post/save")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+
+    @Test
+    @Transactional
+    void updatePost_Ok() throws Exception {
+        UpdatePostRequest request = new UpdatePostRequest("weather", "content of weather");
+
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/post/updated/11")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        CustomResponse<PostDto> response = convertResponseToPostDto(result.getResponse().getContentAsByteArray());
+        assertTrue(response.isSuccess());
+
+        PostDto postDto = Objects.nonNull(response.getBody()) ? response.getBody() : null;
+        assertNotNull(postDto);
+        assertEquals(request.getTitle(), postDto.getTitle());
+        assertEquals(request.getContent(), postDto.getContent());
     }
 
     private CustomResponse<PostDto> convertResponseToPostDto(byte[] content) throws IOException {

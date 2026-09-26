@@ -81,13 +81,13 @@ public class PostController {
                               "success": true
                             }
                             """))))
-    public ResponseEntity<CustomResponse<PostDto>> save(@Validated NewPostRequest newPostRequest,
+    public ResponseEntity<CustomResponse<PostDto>> save(@Validated @RequestBody NewPostRequest newPostRequest,
                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
         CustomResponse<PostDto> response = postService.save(newPostRequest, userDetails.getUser().getId());
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/updated/{id}")
     @Operation(summary = "updated post",
             description = "updated and return post")
     @ApiResponses(value =
@@ -109,14 +109,14 @@ public class PostController {
                             }
                             """))
     ))
-    public ResponseEntity<CustomResponse<PostDto>> updated(@Validated UpdatePostRequest updatePostRequest,
+    public ResponseEntity<CustomResponse<PostDto>> updated(@Validated @RequestBody UpdatePostRequest updatePostRequest,
                                                            @AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @PathVariable int id) {
         CustomResponse<PostDto> response = postService.updated(updatePostRequest, id, userDetails.getUser().getId());
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/updated/{id}")
     @Operation(summary = "deleted post",
             description = "deleted and mark post as deleted")
     public ResponseEntity<Void> deleted(@PathVariable int id, @AuthenticationPrincipal CustomUserDetails userDetails) {
