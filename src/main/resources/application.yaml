@@ -1,4 +1,16 @@
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      ack-mode: manual
+    retry:
+      topic:
+        enabled: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      compression-type: lz4
+      batch-size: 50000
   application:
     name: post_hub2
   datasource:
@@ -36,4 +48,10 @@ springdoc:
 swagger:
   servers:
     first: http://localhost:80
+kafka:
+  enabled: true
+
+aditional:
+  kafka:
+    topic: logs
 
