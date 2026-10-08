@@ -116,7 +116,7 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/updated/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "deleted post",
             description = "deleted and mark post as deleted")
     public ResponseEntity<Void> deleted(@PathVariable int id, @AuthenticationPrincipal CustomUserDetails userDetails) {

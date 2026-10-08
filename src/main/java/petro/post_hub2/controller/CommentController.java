@@ -90,7 +90,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/updated/{id}")
     @Operation(summary = "update comment",
             description = "get updated comment"
     )

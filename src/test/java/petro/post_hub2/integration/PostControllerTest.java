@@ -25,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import petro.post_hub2.SecurityApplication;
 import petro.post_hub2.model.dto.PostDto;
 import petro.post_hub2.model.entity.User;
+import petro.post_hub2.model.enums.PostSortField;
 import petro.post_hub2.model.exceptions.InvalidDataException;
 import petro.post_hub2.model.request.NewPostRequest;
+import petro.post_hub2.model.request.PostSearchRequest;
 import petro.post_hub2.model.request.UpdatePostRequest;
 import petro.post_hub2.model.response.CustomResponse;
 import petro.post_hub2.repository.UserRepository;
@@ -55,10 +57,13 @@ public class PostControllerTest {
     private String adminJwt;
     private String userJwt;
 
+
     @BeforeAll
     void authorize() {
+
         User admin = userRepository.findByIdAndDeletedFalse(3).orElseThrow(() -> new InvalidDataException("admin with id 1 not found"));
         // Hibernate.initialize(admin.getRoles());
+        this.adminJwt = "Bearer " + jwtTokenProvider.generatedToken(admin);
         User user = userRepository.findByIdAndDeletedFalse(2).orElseThrow(() -> new InvalidDataException("user with id 2 not found"));
         // Hibernate.initialize(user.getRoles());
         this.userJwt = "Bearer " + jwtTokenProvider.generatedToken(user);
@@ -165,6 +170,125 @@ public class PostControllerTest {
         assertEquals(request.getTitle(), postDto.getTitle());
         assertEquals(request.getContent(), postDto.getContent());
     }
+
+    @Test
+    @Transactional
+    void updatePost_NotFound_404() throws Exception {
+        UpdatePostRequest request = new UpdatePostRequest("weather", "content weather");
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/post/updated/-1")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    void updatedPost_DontHaveAccess_403() throws Exception {
+        UpdatePostRequest request = new UpdatePostRequest("weather", "content weather");
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/post/updated/5")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    void updatedPost_adminById_Ok() throws Exception {
+        UpdatePostRequest request = new UpdatePostRequest("weather", "content of weather");
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/post/updated/5")
+                                .header("Authorization", adminJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        CustomResponse<PostDto> response = convertResponseToPostDto(result.getResponse().getContentAsByteArray());
+        assertTrue(response.isSuccess());
+
+        PostDto postDto = Objects.nonNull(response.getBody()) ? response.getBody() : null;
+        assertNotNull(postDto);
+
+        assertEquals(request.getTitle(), postDto.getTitle());
+        assertEquals(request.getContent(), postDto.getContent());
+    }
+
+    @Test
+    @Transactional
+    void deletedPost_Ok() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .delete("/post/2")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void deletedPost_NotFound_404() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .delete("/post/-1")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    @Transactional
+    void deletedPost_DontHaveAccess() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .delete("/post/5")   // ПЕРЕВІРИТИ   !!!
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    void deletedPost_adminById_Ok() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .delete("/post/5")   //  ПЕРЕВІРИТИ !!!
+                                .header("Authorization", adminJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void getAllPost_Ok() throws Exception {
+        PostSearchRequest request = new PostSearchRequest("", "", false, "", PostSortField.CONTENT);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .post("/post/search")
+                                .header("Authorization", userJwt)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
 
     private CustomResponse<PostDto> convertResponseToPostDto(byte[] content) throws IOException {
         objectMapper.registerModule(new JavaTimeModule());
