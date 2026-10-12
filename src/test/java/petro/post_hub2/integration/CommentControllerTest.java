@@ -223,7 +223,7 @@ public class CommentControllerTest {
     void deletedComment_Ok_200() throws Exception {
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete("/comment/8")
+                                .delete("/comment/5")
                                 .header("Authorization", userJwt)
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -247,7 +247,7 @@ public class CommentControllerTest {
     void deletedComment_DontHaveAccess_403() throws Exception {
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete("/comment/4")
+                                .delete("/comment/1")
                                 .header("Authorization", userJwt)
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -269,7 +269,7 @@ public class CommentControllerTest {
     @Test
     @Transactional
     void getAllComment_Ok() throws Exception {
-        CommentSearchRequest request = new CommentSearchRequest("", 5, false, CommentSortField.MESSAGE);
+        CommentSearchRequest request = new CommentSearchRequest("", 6, false, CommentSortField.MESSAGE);
         mockMvc.perform(
                         MockMvcRequestBuilders
                                 .post("/comment/search")

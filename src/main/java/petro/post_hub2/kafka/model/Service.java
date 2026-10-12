@@ -1,6 +1,6 @@
 package petro.post_hub2.kafka.model;
 
-public enum SERVICE {
+public enum Service {
     POST_SERVICE,
-    UNDEFINED
+    UNDEFINED_SERVICE
 }

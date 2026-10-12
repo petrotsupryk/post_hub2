@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import petro.post_hub2.kafka.service.KafkaMessageService;
 import petro.post_hub2.mapper.PostMapper;
 import petro.post_hub2.model.constants.ApiErrorMessage;
 import petro.post_hub2.model.dto.PostDto;
@@ -33,12 +34,14 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final AccessValidator accessValidator;
     private final PostMapper postMapper;
+    private final KafkaMessageService kafkaMessageService;
 
     @Override
     public CustomResponse<PostDto> getById(int id) {
         Post post = postRepository.findByIdAndDeletedFalse(id).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(id)));
         PostDto postDto = postMapper.convertPostToPostDto(post);
+        kafkaMessageService.sendPostGetLog(post.getId());
         return CustomResponse.success(postDto);
     }
 
@@ -53,19 +56,21 @@ public class PostServiceImpl implements PostService {
         post.setUser(user);
         post = postRepository.save(post);
         PostDto postDto = postMapper.convertPostToPostDto(post);
+        kafkaMessageService.sendPostCreateLog(post.getId(), userId);
         return CustomResponse.success(postDto);
     }
 
     @Override
-    public CustomResponse<PostDto> updated(UpdatePostRequest updatePostRequest, int postId, int id) {
+    public CustomResponse<PostDto> updated(UpdatePostRequest updatePostRequest, int postId, int userId) {
         Post post = postRepository.findByIdAndDeletedFalse(postId).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
-        accessValidator.validateAdminOrOwnerAccess(post.getUser().getId(), id);
+        accessValidator.validateAdminOrOwnerAccess(post.getUser().getId(), userId);
         post.setTitle(updatePostRequest.getTitle());
         post.setContent(updatePostRequest.getContent());
         post.setUpdated(LocalDateTime.now());
         post = postRepository.save(post);
         PostDto postDto = postMapper.convertPostToPostDto(post);
+        kafkaMessageService.sendPostUpdateLog(postId, userId);
         return CustomResponse.success(postDto);
     }
 
@@ -76,6 +81,7 @@ public class PostServiceImpl implements PostService {
         accessValidator.validateAdminOrOwnerAccess(post.getUser().getId(), userId);
         post.setDeleted(true);
         postRepository.save(post);
+        kafkaMessageService.sendPostDeleLog(post.getId(), userId);
     }
 
     @Override
@@ -90,6 +96,7 @@ public class PostServiceImpl implements PostService {
                         posts.getTotalPages()
                 )
         );
+        kafkaMessageService.sendPostGetAllByPagination();
         return CustomResponse.success(paginationResponse);
     }
 
@@ -106,6 +113,7 @@ public class PostServiceImpl implements PostService {
                         posts.getTotalPages()
                 )
         );
+        kafkaMessageService.sendPostGetAllByPaginationAndParam();
         return CustomResponse.success(paginationResponse);
     }
 
