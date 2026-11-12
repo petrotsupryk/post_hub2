@@ -65,4 +65,64 @@ public class KafkaMessageService {
                 .build();
         messageProducer.sendLog(utilMessage);
     }
+
+    public void sendCommentCreateLog(int userId, int commentId) {
+        UtilMessage utilMessage = UtilMessage.builder()
+                .userId(userId)
+                .message("user with id: " + userId + "create comment with id: " + commentId)
+                .actionType(ActionType.CREATE)
+                .priorityType(PriorityType.MEDIUM)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
+
+    public void sendCommentGetLog(int commentId) {
+        UtilMessage utilMessage = UtilMessage
+                .builder()
+                .message("user get comment with id: " + commentId)
+                .actionType(ActionType.GET)
+                .priorityType(PriorityType.LOW)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
+
+    public void sendCommentUpdateLog(int commentId, int userId) {
+        UtilMessage utilMessage = UtilMessage
+                .builder()
+                .message("user with id: " + userId + "update comment with id: " + commentId)
+                .actionType(ActionType.UPDATE)
+                .priorityType(PriorityType.MEDIUM)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
+
+    public void sendCommentDeleteLog(int commentId, int userId) {
+        UtilMessage utilMessage = UtilMessage
+                .builder()
+                .message("user with id: " + userId + "delete comment with id: " + commentId)
+                .actionType(ActionType.DELETE)
+                .priorityType(PriorityType.MEDIUM)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
+
+    public void findCommentsByPagination() {
+        UtilMessage utilMessage = UtilMessage
+                .builder()
+                .message("user get all comments by pagination")
+                .actionType(ActionType.GET)
+                .priorityType(PriorityType.LOW)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
+
+    public void findAllCommentsByPaginationAndParam() {
+        UtilMessage utilMessage = UtilMessage
+                .builder()
+                .message("user get all comments by pagination and param")
+                .actionType(ActionType.GET)
+                .priorityType(PriorityType.LOW)
+                .build();
+        messageProducer.sendLog(utilMessage);
+    }
 }

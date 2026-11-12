@@ -14,7 +14,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class MessageProducer {
     private final JsonMapper jsonMapper;
     private final KafkaTemplate<String, String> kafkaTemplate;
-    @Value("logs")
+    @Value("log2")
     public String topic;
     @Value("true")
     public boolean isEnabled;

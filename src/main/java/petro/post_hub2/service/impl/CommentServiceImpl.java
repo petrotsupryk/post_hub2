@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import petro.post_hub2.kafka.service.KafkaMessageService;
 import petro.post_hub2.mapper.CommentMapper;
 import petro.post_hub2.model.constants.ApiErrorMessage;
 import petro.post_hub2.model.dto.CommentDto;
@@ -33,12 +34,14 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final AccessValidator accessValidator;
+    private final KafkaMessageService kafkaMessageService;
 
     @Override
     public CustomResponse<CommentDto> getCommentById(int id) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(id).orElseThrow(() ->
                 new NotFoundException(ApiErrorMessage.COOMENT_NOT_FOUND_BY_ID.getMessage(id)));
         CommentDto commentDto = commentMapper.convertCommentToCommentDto(comment);
+        kafkaMessageService.sendCommentGetLog(comment.getId());
         return CustomResponse.success(commentDto);
     }
 
@@ -51,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.convertNewCommentRequestToComment(newCommentRequest, user, post);
         comment = commentRepository.save(comment);
         CommentDto commentDto = commentMapper.convertCommentToCommentDto(comment);
+        kafkaMessageService.sendCommentCreateLog(userId, comment.getId());
         return CustomResponse.success(commentDto);
     }
 
@@ -62,6 +66,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setMessage(updateCommentRequest.getMessage());
         comment = commentRepository.save(comment);
         CommentDto commentDto = commentMapper.convertCommentToCommentDto(comment);
+        kafkaMessageService.sendCommentUpdateLog(comment.getId(), userId);
         return CustomResponse.success(commentDto);
     }
 
@@ -71,6 +76,7 @@ public class CommentServiceImpl implements CommentService {
                 new NotFoundException(ApiErrorMessage.COOMENT_NOT_FOUND_BY_ID.getMessage(id)));
         accessValidator.validateAdminOrOwnerAccess(comment.getUser().getId(), userId);
         comment.setDeleted(true);
+        kafkaMessageService.sendCommentDeleteLog(comment.getId(), userId);
         commentRepository.save(comment);
     }
 
@@ -87,6 +93,7 @@ public class CommentServiceImpl implements CommentService {
                         comments.getTotalPages()
                 )
         );
+        kafkaMessageService.findCommentsByPagination();
         return CustomResponse.success(paginationResponse);
     }
 
@@ -104,6 +111,7 @@ public class CommentServiceImpl implements CommentService {
                         comments.getTotalPages()
                 )
         );
+        kafkaMessageService.findAllCommentsByPaginationAndParam();
         return CustomResponse.success(paginationResponse);
     }
 }

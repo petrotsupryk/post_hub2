@@ -2,7 +2,6 @@ package petro.post_hub2.kafka.model;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 
